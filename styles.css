@@ -1,0 +1,133 @@
+/* Styles de base */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0; /* Suppression des marges par défaut */
+    padding: 200px; /* Espacement autour du contenu */
+}
+
+/* Titres */
+h1, h2 {
+    color: #333; /* Couleur des titres principaux */
+    text-align: center; /* Centrer le titre */
+}
+
+/* Section des articles */
+.articles {
+    display: flex; /* Utiliser Flexbox pour aligner les articles en ligne */
+    flex-wrap: wrap; /* Permettre aux articles de passer à la ligne si nécessaire */
+    justify-content: flex-start; /* Commencer à aligner les articles à gauche */
+    margin-top: 20px;
+}
+
+/* Chaque article */
+.articles li {
+    list-style: none; /* Retirer les puces des listes */
+    background-color: #fff; /* Couleur de fond pour chaque article */
+    border: 1px solid #ddd; /* Bordure grise autour de chaque article */
+    padding: 15px; /* Espacement intérieur */
+    flex: 1 1 calc(20% - 20px); /* Ajuster la largeur des articles (5 articles par ligne avec marges) */
+    margin: 10px; /* Espacement entre les articles */
+    border-radius: 10px; /* Coins arrondis */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Ombre légère */
+    transition: transform 0.3s ease; /* Ajout d'une animation lors du survol */
+}
+
+.articles li:hover {
+    transform: translateY(-5px); /* L'effet de levée au survol */
+}
+
+/* Images des articles */
+.articles img {
+    max-width: 100%; /* Limite la taille des images à la largeur de l'article */
+    height: auto; /* Maintient le ratio d'aspect */
+    border-radius: 5px; /* Coins arrondis pour les images */
+}
+
+/* Détails des articles */
+.article-details {
+    margin-top: 10px; /* Espacement au-dessus des détails */
+}
+
+.article-details strong {
+    font-size: 16px; /* Taille du texte pour le nom de l'article */
+    color: #333; /* Couleur du texte */
+    display: block; /* Afficher en bloc pour que cela soit bien aligné */
+    margin-bottom: 8px; /* Espacement en bas */
+}
+
+.article-details p {
+    font-size: 14px; /* Taille du texte pour le prix */
+    color: #666; /* Couleur du texte pour le prix */
+    margin-bottom: 10px; /* Espacement en bas */
+}
+
+/* Bouton "Ajouter au panier" */
+.add-to-cart-btn {
+    background-color: #28a745; /* Couleur de fond verte */
+    color: white; /* Couleur du texte */
+    padding: 10px; /* Espacement intérieur */
+    border: none; /* Supprime la bordure par défaut */
+    border-radius: 5px; /* Coins arrondis */
+    cursor: pointer; /* Change le curseur pour indiquer que c'est cliquable */
+    transition: background-color 0.3s; /* Transition douce pour le changement de couleur */
+}
+
+.add-to-cart-btn:hover {
+    background-color: #218838; /* Couleur plus foncée au survol */
+}
+
+/* Section du panier en bas */
+.panier-preview {
+    text-align: center; /* Centrer le texte */
+    margin-top: 40px; /* Espacement en haut */
+}
+
+#view-cart-btn {
+    background-color: #007bff; /* Couleur de fond bleue */
+    color: white; /* Couleur du texte */
+    padding: 10px 15px; /* Espacement intérieur */
+    border: none; /* Supprime la bordure par défaut */
+    border-radius: 5px; /* Coins arrondis */
+    cursor: pointer; /* Change le curseur pour indiquer que c'est cliquable */
+    transition: background-color 0.3s; /* Transition douce pour le changement de couleur */
+}
+
+#view-cart-btn:hover {
+    background-color: #0056b3; /* Couleur plus foncée au survol */
+}
+
+/* Fond d'écran pour index.html */
+.index-background {
+    background-image: url('image/5.jpg'); /* Remplacez par l'image de fond pour index.html */
+    background-size: cover; /* Couvre toute la page */
+    background-position: center; /* Centre l'image */
+    background-repeat: no-repeat; /* Évite de répéter l'image */
+}
+
+/* Fond d'écran pour panier.html */
+.panier-background {
+    background-image: url('image/4.jpg'); /* Remplacez par l'image de fond pour panier.html */
+    background-size: cover; /* Couvre toute la page */
+    background-position: center; /* Centre l'image */
+    background-repeat: no-repeat; /* Évite de répéter l'image */
+}
+
+/* Fond d'écran pour marcio.html */
+.marcio-background {
+    background-image: url('image/3.jpg'); /* Remplacez par l'image de fond pour marcio.html */
+    background-size: cover; /* Couvre toute la page */
+    background-position: center; /* Centre l'image */
+    background-repeat: no-repeat; /* Évite de répéter l'image */
+}
+
+/* Médias Queries pour les écrans plus petits */
+@media (max-width: 768px) {
+    .articles li {
+        flex: 1 1 calc(50% - 20px); /* 2 articles par ligne */
+    }
+}
+
+@media (max-width: 480px) {
+    .articles li {
+        flex: 1 1 100%; /* 1 article par ligne */
+    }

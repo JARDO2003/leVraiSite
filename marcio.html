@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Articles - THE MARKET</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Lien vers le fichier CSS -->
+
+    <!-- Inclure Firebase via la version v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCL0VrMAt9XNGgX1e0_HIEVC03teeOvqtY",
+            authDomain: "marciojardel-ce0d5.firebaseapp.com",
+            databaseURL: "https://marciojardel-ce0d5-default-rtdb.firebaseio.com",
+            projectId: "marciojardel-ce0d5",
+            storageBucket: "marciojardel-ce0d5.appspot.com",
+            messagingSenderId: "313912737797",
+            appId: "1:313912737797:web:72fee65438c79c86715c6c",
+            measurementId: "G-YN957W0TE0"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const publishForm = document.getElementById("publish-form");
+            const deleteForm = document.getElementById("delete-form");
+            const ordersList = document.getElementById("orders-list");
+
+            // Publier un article
+            publishForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                const name = document.getElementById("article-name").value;
+                const price = document.getElementById("article-price").value;
+                const imageFile = document.getElementById("article-image").files[0];
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const article = {
+                        name: name,
+                        price: price,
+                        image: e.target.result
+                    };
+
+                    const newArticleRef = database.ref('articles').push();
+                    newArticleRef.set(article).then(() => {
+                        alert("Article publié avec succès !");
+                        publishForm.reset();
+                    }).catch((error) => {
+                        console.error("Erreur lors de la publication de l'article : ", error);
+                    });
+                };
+                reader.readAsDataURL(imageFile);
+            });
+
+            // Supprimer un article
+            deleteForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                const articleName = document.getElementById("delete-article-name").value;
+                const articlesRef = database.ref('articles');
+
+                articlesRef.once('value').then((snapshot) => {
+                    let found = false;
+                    snapshot.forEach((childSnapshot) => {
+                        const article = childSnapshot.val();
+                        if (article.name === articleName) {
+                            found = true;
+                            database.ref('articles/' + childSnapshot.key).remove().then(() => {
+                                alert("Article supprimé avec succès !");
+                                deleteForm.reset();
+                            });
+                        }
+                    });
+                    if (!found) {
+                        alert("Article non trouvé !");
+                    }
+                }).catch((error) => {
+                    console.error("Erreur lors de la suppression de l'article : ", error);
+                });
+            });
+
+            // Fonction pour charger les commandes depuis Firebase
+            function loadOrders() {
+                ordersList.innerHTML = ""; // Vider la liste des commandes actuelles
+                const ordersRef = database.ref('orders'); // Référence à la base de données
+
+                ordersRef.once('value').then((snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        const order = childSnapshot.val();
+                        const orderKey = childSnapshot.key; // Clé unique de la commande
+                        const listItem = document.createElement("li");
+
+                        // Vérifiez si order.items est défini et un tableau
+                        const itemsList = (order.items && Array.isArray(order.items)) ? order.items.map(item => item.name).join(", ") : "Aucun article";
+
+                        // Vérifiez si order.totalPrice est défini
+                        const totalPrice = order.totalPrice ? order.totalPrice + ' €' : 'Non défini';
+
+                        listItem.innerHTML = `
+                            <strong>Nom du client :</strong> ${order.name || "Inconnu"}<br>
+                            <strong>Contact :</strong> ${order.contact || "Inconnu"}<br>
+                            <strong>Articles commandés :</strong> ${itemsList}<br>
+                            <strong>Prix total :</strong> ${totalPrice}<br>
+                            <button class="delete-order-btn" data-key="${orderKey}">Supprimer la commande</button><br>
+                            <hr>`;
+                        ordersList.appendChild(listItem);
+
+                        // Ajouter l'événement pour supprimer la commande
+                        listItem.querySelector(".delete-order-btn").addEventListener("click", function() {
+                            deleteOrder(orderKey);
+                        });
+                    });
+                }).catch((error) => {
+                    console.error("Erreur lors de la lecture des commandes : ", error);
+                });
+            }
+
+            // Fonction pour supprimer une commande
+            function deleteOrder(orderKey) {
+                const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer cette commande ?");
+                if (confirmDelete) {
+                    database.ref('orders/' + orderKey).remove()
+                        .then(() => {
+                            alert("Commande supprimée avec succès !");
+                            loadOrders(); // Recharger la liste des commandes après suppression
+                        })
+                        .catch((error) => {
+                            console.error("Erreur lors de la suppression de la commande : ", error);
+                        });
+                }
+            }
+
+            // Charger les commandes lors du chargement de la page
+            loadOrders();
+        });
+    </script>
+</head>
+<body class="marcio-background"> <!-- Classe de fond d'écran appliquée ici -->
+    <h1>Gestion des Articles</h1>
+
+    <!-- Publier un article -->
+    <section>
+        <h2>Publier un article</h2>
+        <form id="publish-form">
+            <input type="text" id="article-name" placeholder="Nom de l'article" required>
+            <input type="number" id="article-price" placeholder="Prix de l'article" required>
+            <input type="file" id="article-image" accept="image/*" required>
+            <button type="submit">Publier l'article</button>
+        </form>
+    </section>
+
+    <!-- Supprimer un article -->
+    <section>
+        <h2>Supprimer un article</h2>
+        <form id="delete-form">
+            <input type="text" id="delete-article-name" placeholder="Nom de l'article" required>
+            <button type="submit">Supprimer l'article</button>
+        </form>
+    </section>
+
+    <!-- Liste des commandes -->
+    <section>
+        <h2>Commandes passées</h2>
+        <ul id="orders-list"></ul> <!-- Liste où les commandes seront affichées -->
+    </section>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue - THE MARKET</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Lien vers le fichier CSS -->
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCL0VrMAt9XNGgX1e0_HIEVC03teeOvqtY",
+            authDomain: "marciojardel-ce0d5.firebaseapp.com",
+            databaseURL: "https://marciojardel-ce0d5-default-rtdb.firebaseio.com",
+            projectId: "marciojardel-ce0d5",
+            storageBucket: "marciojardel-ce0d5.appspot.com",
+            messagingSenderId: "313912737797",
+            appId: "1:313912737797:web:72fee65438c79c86715c6c",
+            measurementId: "G-YN957W0TE0"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const homeArticleList = document.getElementById("home-article-list");
+            loadHomeArticles();
+
+            // Charger les articles depuis Firebase
+            function loadHomeArticles() {
+                homeArticleList.innerHTML = ""; // Vider la liste des articles
+                const articlesRef = database.ref('articles'); // Référence à la base de données
+
+                articlesRef.once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            const article = childSnapshot.val();
+                            const listItem = document.createElement("li");
+                            listItem.innerHTML = `
+                                <img src="${article.image}" alt="${article.name}" class="article-img">
+                                <div class="article-details">
+                                    <strong>${article.name}</strong>
+                                    <p>${article.price} €</p>
+                                    <button class="add-to-cart-btn" data-key="${childSnapshot.key}">Ajouter au panier</button>
+                                </div>`;
+                            homeArticleList.appendChild(listItem);
+
+                            // Fonction pour ajouter un article au panier
+                            listItem.querySelector(".add-to-cart-btn").addEventListener("click", function() {
+                                addToCart(article);
+                            });
+                        });
+                    } else {
+                        console.log("Aucun article trouvé.");
+                    }
+                }).catch((error) => {
+                    console.error("Erreur lors de la lecture des articles : ", error);
+                });
+            }
+
+            // Fonction pour ajouter un article au panier
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            function addToCart(article) {
+                cart.push(article);
+                localStorage.setItem('cart', JSON.stringify(cart)); // Sauvegarder dans localStorage
+                alert(`${article.name} ajouté au panier !`);
+            }
+
+            // Redirection vers la page du panier
+            document.getElementById("view-cart-btn").addEventListener("click", function() {
+                window.location.href = 'panier.html'; // Redirige vers la page panier
+            });
+
+            // Fonction pour le bouton Marcio
+            document.getElementById("marcio-btn").addEventListener("click", function() {
+                const password = prompt("Veuillez saisir le mot de passe :"); // Demande de mot de passe
+                if (password === "policeDE2003") { // Remplacez 'votre_mot_de_passe' par le mot de passe réel
+                    window.location.href = 'marcio.html'; // Redirige vers la page de gestion des articles
+                } else {
+                    alert("Mot de passe incorrect !"); // Message d'erreur
+                }
+            });
+        });
+    </script>
+</head>
+<body class="index-background"> <!-- Classe de fond d'écran appliquée ici -->
+    <header>
+        <h1>Bienvenue sur THE MARKET</h1>
+        <p>Découvrez nos articles en vente.</p>
+    </header>
+
+    <!-- Section pour afficher les articles publiés -->
+    <section class="articles">
+        <h2>Nos articles</h2>
+        <ul id="home-article-list"></ul> <!-- Liste d'articles -->
+    </section>
+
+    <!-- Section pour le bouton Marcio -->
+    <section class="gestion">
+        <button id="marcio-btn">Marcio - Gestion des articles</button>
+    </section>
+
+    <!-- Section pour afficher le panier -->
+    <section class="panier-preview">
+        <h2>Votre Panier</h2>
+        <button id="view-cart-btn">Voir mon panier</button>
+    </section>
+</body>
+</html>

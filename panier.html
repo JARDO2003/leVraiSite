@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votre Panier - THE MARKET</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Lien vers le fichier CSS -->
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCL0VrMAt9XNGgX1e0_HIEVC03teeOvqtY",
+            authDomain: "marciojardel-ce0d5.firebaseapp.com",
+            databaseURL: "https://marciojardel-ce0d5-default-rtdb.firebaseio.com",
+            projectId: "marciojardel-ce0d5",
+            storageBucket: "marciojardel-ce0d5.appspot.com",
+            messagingSenderId: "313912737797",
+            appId: "1:313912737797:web:72fee65438c79c86715c6c",
+            measurementId: "G-YN957W0TE0"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const cartPreview = document.getElementById("cart-preview");
+            const totalPriceElement = document.getElementById("total-price");
+            const submitButton = document.getElementById("submit-order");
+
+            // Initialiser le panier
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            updateCartPreview();
+
+            // Met à jour l'affichage du panier
+            function updateCartPreview() {
+                cartPreview.innerHTML = ""; // Vider le contenu du panier
+                let totalPrice = 0; // Initialiser le prix total
+
+                cart.forEach((article, index) => {
+                    const listItem = document.createElement("li");
+                    listItem.innerHTML = `
+                        <strong>${article.name}</strong> - ${article.price} € 
+                        <button class="remove-btn" data-index="${index}">Retirer</button>`;
+                    cartPreview.appendChild(listItem);
+                    totalPrice += parseFloat(article.price); // Ajouter au prix total
+                });
+
+                totalPriceElement.textContent = `Prix total : ${totalPrice.toFixed(2)} €`;
+
+                // Ajouter les événements de retrait
+                document.querySelectorAll(".remove-btn").forEach(button => {
+                    button.addEventListener("click", function() {
+                        const index = button.getAttribute("data-index");
+                        removeFromCart(index);
+                    });
+                });
+            }
+
+            // Fonction pour retirer un article du panier
+            function removeFromCart(index) {
+                cart.splice(index, 1); // Retirer l'article du panier
+                localStorage.setItem('cart', JSON.stringify(cart)); // Mettre à jour localStorage
+                updateCartPreview(); // Mettre à jour l'affichage du panier
+                alert("Article retiré du panier !");
+            }
+
+            // Soumettre la commande
+            submitButton.addEventListener("click", function() {
+                const name = document.getElementById("customer-name").value;
+                const contact = document.getElementById("customer-contact").value;
+
+                if (name && contact) {
+                    // Enregistrer la commande dans Firebase
+                    const order = {
+                        name: name,
+                        contact: contact,
+                        items: cart,
+                        totalPrice: totalPriceElement.textContent.replace('Prix total : ', '').replace(' €', '') // Extraire le prix total
+                    };
+
+                    // Référence à la base de données pour enregistrer la commande
+                    const ordersRef = database.ref('orders');
+                    ordersRef.push(order)
+                        .then(() => {
+                            alert(`Commande validée pour ${name} avec le contact ${contact}`);
+                            // Réinitialiser le panier après validation
+                            localStorage.removeItem('cart');
+                            cart = []; // Vider le panier
+                            updateCartPreview(); // Mettre à jour l'affichage du panier
+                        })
+                        .catch((error) => {
+                            console.error("Erreur lors de l'enregistrement de la commande : ", error);
+                        });
+                } else {
+                    alert("Veuillez remplir tous les champs.");
+                }
+            });
+        });
+    </script>
+</head>
+<body class="panier-background"> <!-- Classe de fond d'écran appliquée ici -->
+    <header>
+        <h1>Votre Panier</h1>
+    </header>
+
+    <section class="panier-preview">
+        <h2>Articles dans le panier</h2>
+        <ul id="cart-preview"></ul> <!-- Affichage des articles dans le panier -->
+        <p id="total-price">Prix total : 0.00 €</p> <!-- Prix total -->
+
+        <!-- Formulaire pour valider la commande -->
+        <h3>Valider la commande</h3>
+        <input type="text" id="customer-name" placeholder="Votre nom" required>
+        <input type="text" id="customer-contact" placeholder="WhatsApp ou Email" required>
+        <button id="submit-order">Valider la commande</button>
+    </section>
+</body>
+</html>
